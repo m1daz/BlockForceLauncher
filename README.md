@@ -1,0 +1,5 @@
+# Block Forc eLauncher
+The Open-Source project related to the Launcher for Windows
+
+# How to use
+Get download in Discord Server, or compile it yourself!
