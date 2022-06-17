@@ -1,4 +1,4 @@
-# Block Forc eLauncher
+# Block Force Launcher
 The Open-Source project related to the Launcher for Windows
 
 # How to use
