@@ -95,6 +95,7 @@
             this.comboVersion.Name = "comboVersion";
             this.comboVersion.Size = new System.Drawing.Size(237, 28);
             this.comboVersion.TabIndex = 0;
+            this.comboVersion.SelectedIndexChanged += new System.EventHandler(this.comboVersion_SelectedIndexChanged);
             // 
             // Form1
             // 

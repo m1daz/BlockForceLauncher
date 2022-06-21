@@ -83,23 +83,43 @@ namespace BlockForceLauncher
 
         string get_local_beta_version()
         {
-            return File.ReadAllText(@"files\beta.txt");
+            if (File.Exists(@"files\release.tzt"))
+                return File.ReadAllText(@"files\release.txt");
+            else
+                return "";
         }
 
         string get_local_release_version()
         {
-            return File.ReadAllText(@"files\release.txt");
+            if (File.Exists(@"files\release.tzt"))
+                return File.ReadAllText(@"files\release.txt");
+            else
+                return "";
         }
 
         void check_for_updates(string cv, string cb, string fb, string fr)
         {
             if (cv != get_local_release_version())
             {
-                MessageBox.Show("Outdated Release Version Installed, Launch a release version to update!", "Block Force Remastered");
+                if (get_local_release_version() == "")
+                {
+
+                }
+                else
+                {
+                    MessageBox.Show("Outdated Release Version Installed, Launch a release version to update!", "Block Force Remastered");
+                }
             }
             if (cb != get_local_beta_version())
             {
-                MessageBox.Show("Outdated Beta Version Installed, Launch a release version to update!", "Block Force Remastered");
+                if (get_local_beta_version() == "")
+                {
+
+                }
+                else
+                {
+                    MessageBox.Show("Outdated Beta Version Installed, Launch a release version to update!", "Block Force Remastered");
+                }
             }
         }
 
@@ -124,6 +144,10 @@ namespace BlockForceLauncher
             file_beta = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/beta-file");
             file_release = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/release-file");
             this.comboVersion.SelectedIndex = 0;
+            if (get_local_release_version() != "")
+            {
+                label1.Text = get_local_release_version();
+            }
             if (has_version_files())
             {
                 // Check for updates
@@ -221,6 +245,31 @@ namespace BlockForceLauncher
                     break;
                 default:
                     launch_release();
+                    break;
+            }
+        }
+
+        private void comboVersion_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (this.comboVersion.SelectedIndex)
+            {
+                case 0:
+                    if (get_local_release_version() != "")
+                    {
+                        label1.Text = get_local_release_version();
+                    }
+                    break;
+                case 1:
+                    if (get_local_beta_version() != "")
+                    {
+                        label1.Text = get_local_beta_version();
+                    }
+                    break;
+                default:
+                    if (get_local_release_version() != "")
+                    {
+                        label1.Text = get_local_release_version();
+                    }
                     break;
             }
         }
