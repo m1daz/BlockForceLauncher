@@ -10,6 +10,8 @@ using System.Windows.Forms;
 using System.Net;
 using System.IO;
 using System.Diagnostics;
+using System.Threading;
+using System.Net.Mime;
 
 namespace BlockForceLauncher
 {
@@ -18,7 +20,7 @@ namespace BlockForceLauncher
         WebClient wc = new WebClient();
         string current_version;
         string current_beta;
-
+        string[] dependencies;
         string file_beta;
         string file_release;
         public Form1()
@@ -64,13 +66,13 @@ namespace BlockForceLauncher
                     }
                     else
                     {
-                        File.Create(@"files\beta.txt");
+                        File.WriteAllText(@"files\beta.txt", "");
                         return create_files();
                     }
                 }
                 else
                 {
-                    File.Create(@"files\release.txt");
+                    File.WriteAllText(@"files\release.txt", "");
                     return create_files();
                 }
             }
@@ -83,16 +85,22 @@ namespace BlockForceLauncher
 
         string get_local_beta_version()
         {
-            if (File.Exists(@"files\release.tzt"))
-                return File.ReadAllText(@"files\release.txt");
+            if (File.Exists(@"files\beta.txt"))
+                using (StreamReader read = new StreamReader(@"files\beta.txt"))
+                {
+                    return read.ReadToEnd();
+                }
             else
                 return "";
         }
 
         string get_local_release_version()
         {
-            if (File.Exists(@"files\release.tzt"))
-                return File.ReadAllText(@"files\release.txt");
+            if (File.Exists(@"files\release.txt"))
+                using (StreamReader read = new StreamReader(@"files\release.txt"))
+                {
+                    return read.ReadToEnd();
+                }
             else
                 return "";
         }
@@ -107,7 +115,10 @@ namespace BlockForceLauncher
                 }
                 else
                 {
-                    MessageBox.Show("Outdated Release Version Installed, Launch a release version to update!", "Block Force Remastered");
+                    new Thread(() =>
+                    {
+                        MessageBox.Show("Outdated Release Version Installed, Launch a release version to update!", "Block Force Remastered");
+                    }).Start();
                 }
             }
             if (cb != get_local_beta_version())
@@ -118,7 +129,10 @@ namespace BlockForceLauncher
                 }
                 else
                 {
-                    MessageBox.Show("Outdated Beta Version Installed, Launch a release version to update!", "Block Force Remastered");
+                    new Thread(() =>
+                    {
+                        MessageBox.Show("Outdated Beta Version Installed, Launch a release version to update!", "Block Force Remastered");
+                    }).Start();
                 }
             }
         }
@@ -151,6 +165,21 @@ namespace BlockForceLauncher
             if (has_version_files())
             {
                 // Check for updates
+                if (get_local_release_version() != "") {
+                    label1.Text = "V" + get_local_release_version();
+                    if (current_version != get_local_release_version())
+                    {
+                        label1.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        label1.ForeColor = Color.LightGreen;
+                    }
+                }
+                else
+                {
+                    label1.Text = "V" + current_version;
+                }
                 check_for_updates(current_version, current_beta, file_beta, file_release);
             }
             else
@@ -179,6 +208,11 @@ namespace BlockForceLauncher
 
         void launch_release()
         {
+            current_version = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/current-release");
+            current_beta = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/current-beta");
+
+            file_beta = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/beta-file");
+            file_release = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/release-file");
             if (!is_up_to_date(0))
             {
                 if (File.Exists(@"files/BlockForceRelease.exe"))
@@ -187,13 +221,26 @@ namespace BlockForceLauncher
                 }
                 button1.Enabled = false;
                 label1.Text = "Updating...";
-                wc.DownloadFile(file_release, @"files/BlockForceRelease.exe");
-                label1.Text = "Launching...";
-                Process.Start(@".\files\BlockForceRelease.exe");
-                label1.Text = "V" + current_version;
-                write_release_version();
-                button1.Enabled = true;
-
+                mainProcess.Text = "Downloading Game";
+                subProcess.Text = "Loading...";
+                mainProcess.Visible = true;
+                subProcess.Visible = true;
+                downloadProgress.Visible = true;
+                WebClient dlClient = new WebClient();
+                downloadProgress.Value = 0;
+                dlClient.DownloadProgressChanged += (s, e) =>
+                {
+                    double curProgress = Math.Round((e.BytesReceived / 1024.0 / 1024.0), 2);
+                    double totalProgress = Math.Round((e.TotalBytesToReceive / 1024.0 / 1024.0), 2);
+                    subProcess.Text = String.Format("{0}/{1} MB", curProgress, totalProgress);
+                    downloadProgress.Value = e.ProgressPercentage;
+                };
+                dlClient.DownloadFileCompleted += (s, e) =>
+                {
+                    download_external_dependencies(0, false);
+                    // any other code to process the file
+                };
+                dlClient.DownloadFileAsync(new Uri(file_release), @"files/BlockForceRelease.exe");
             }
             else
             {
@@ -208,6 +255,11 @@ namespace BlockForceLauncher
 
         void launch_beta()
         {
+            current_version = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/current-release");
+            current_beta = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/current-beta");
+
+            file_beta = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/beta-file");
+            file_release = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/release-file");
             if (!is_up_to_date(1))
             {
                 if (File.Exists(@"files/BlockForceBeta.exe"))
@@ -216,12 +268,25 @@ namespace BlockForceLauncher
                 }
                 button1.Enabled = false;
                 label1.Text = "Updating...";
-                wc.DownloadFile(file_beta, @"files/BlockForceBeta.exe");
-                label1.Text = "Launching...";
-                Process.Start(@".\files\BlockForceBeta.exe");
-                label1.Text = "V" + current_beta;
-                write_beta_version();
-                button1.Enabled = true;
+                mainProcess.Text = "Downloading Game";
+                subProcess.Text = "Loading...";
+                mainProcess.Visible = true;
+                subProcess.Visible = true;
+                downloadProgress.Visible = true;
+                downloadProgress.Value = 0;
+                WebClient dlClient = new WebClient();
+                dlClient.DownloadProgressChanged += (s, e) =>
+                {
+                    double curProgress = Math.Round((e.BytesReceived / 1024.0 / 1024.0), 2);
+                    double totalProgress = Math.Round((e.TotalBytesToReceive / 1024.0 / 1024.0), 2);
+                    subProcess.Text = String.Format("{0}/{1} MB", curProgress, totalProgress);
+                    downloadProgress.Value = e.ProgressPercentage;
+                };
+                dlClient.DownloadFileCompleted += (s, e) =>
+                {
+                    download_external_dependencies(1, false);
+                };
+                dlClient.DownloadFileAsync(new Uri(file_beta), @"files/BlockForceBeta.exe");
             }
             else
             {
@@ -236,7 +301,9 @@ namespace BlockForceLauncher
 
         private void button1_Click(object sender, EventArgs e)
         {
-            switch (this.comboVersion.SelectedIndex) {
+            label1.ForeColor = Color.White;
+            switch (this.comboVersion.SelectedIndex)
+            {
                 case 0:
                     launch_release();
                     break;
@@ -249,6 +316,103 @@ namespace BlockForceLauncher
             }
         }
 
+        public void download_external_dependencies(int ver, bool skip = false)
+        {
+            if (skip == false)
+            {
+                string stringResult = wc.DownloadString("https://raw.githubusercontent.com/generic-glitch/BlockForceLauncher/master/dependecies");
+                dependencies = stringResult.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                label1.Text = "Downloading Dependencies";
+                download_file(dependencies[0], (() =>
+                {
+                    dependencies = dependencies.Skip(1).ToArray();
+                    download_external_dependencies(ver, true);
+                }));
+            }
+            else if (skip && dependencies.Length < 1)
+            {
+                downloadProgress.Visible = false;
+                mainProcess.Visible = false;
+                subProcess.Visible = false;
+                if (this.label1.InvokeRequired)
+                {
+                    this.label1.BeginInvoke((MethodInvoker)delegate () { this.label1.Text = "Launching..."; });
+                }
+                else
+                {
+                    this.label1.Text = "Launching...";
+                }
+                if (ver == 1)
+                {
+                    Process.Start(@".\files\BlockForceBeta.exe");
+                    write_beta_version();
+                }
+                else
+                {
+                    Process.Start(@".\files\BlockForceRelease.exe");
+                    write_release_version();
+                }
+                if (this.label1.InvokeRequired)
+                {
+                    this.label1.BeginInvoke((MethodInvoker)delegate () { this.label1.Text = "V" + current_version; });
+                }
+                else
+                {
+                    this.label1.Text = "V" + current_version;
+                }
+                if (this.button1.InvokeRequired)
+                {
+                    this.button1.BeginInvoke((MethodInvoker)delegate () { this.button1.Enabled = true; });
+                }
+                else
+                {
+                    this.button1.Enabled = true;
+                }
+                label1.ForeColor = Color.LightGreen;
+            }
+            else
+            {
+                download_file(dependencies[0], (() =>
+                {
+                    dependencies = dependencies.Skip(1).ToArray();
+                    download_external_dependencies(ver, true);
+                }));
+            }
+        }
+        public delegate void DownloadCompleteCallback();
+        public void download_file(string url, DownloadCompleteCallback dlComplCallback)
+        {
+            label1.Text = "Downloading Dependencies";
+            WebClient dlClient = new WebClient();
+            string file_name = GetFilenameFromWebServer(url);
+            mainProcess.Text = file_name;
+            subProcess.Text = "Loading...";
+            mainProcess.Visible = true;
+            subProcess.Visible = true;
+            downloadProgress.Visible = true;
+            downloadProgress.Value = 0;
+            dlClient.DownloadProgressChanged += (s, e) =>
+            {
+                double curProgress = Math.Round((e.BytesReceived / 1024.0 / 1024.0), 2);
+                double totalProgress = Math.Round((e.TotalBytesToReceive / 1024.0 / 1024.0), 2);
+                subProcess.Text = String.Format("{0}/{1} MB", curProgress, totalProgress);
+                downloadProgress.Value = e.ProgressPercentage;
+            };
+            dlClient.DownloadFileCompleted += (s, e) =>
+            {
+                dlComplCallback();
+                // any other code to process the file
+            };
+            dlClient.DownloadFileAsync(new Uri(url), @"files/"+file_name);
+        }
+
+        public string GetFilenameFromWebServer(string url)
+        {
+            var uri = new Uri(url);
+            string filename = uri.Segments.Last();
+            return filename;
+        }
+
         private void comboVersion_SelectedIndexChanged(object sender, EventArgs e)
         {
             switch (this.comboVersion.SelectedIndex)
@@ -256,19 +420,55 @@ namespace BlockForceLauncher
                 case 0:
                     if (get_local_release_version() != "")
                     {
-                        label1.Text = get_local_release_version();
+                        label1.Text = "V" + get_local_release_version();
+                    }
+                    else
+                    {
+                        label1.Text = "V" + current_version;
+                    }
+                    if (current_version != get_local_release_version())
+                    {
+                        label1.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        label1.ForeColor = Color.LightGreen;
                     }
                     break;
                 case 1:
                     if (get_local_beta_version() != "")
                     {
-                        label1.Text = get_local_beta_version();
+                        label1.Text = "V" + get_local_beta_version();
+                    }
+                    else
+                    {
+                        label1.Text = "V" + current_beta;
+                    }
+                    if (current_beta != get_local_beta_version())
+                    {
+                        label1.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        label1.ForeColor = Color.LightGreen;
                     }
                     break;
                 default:
                     if (get_local_release_version() != "")
                     {
-                        label1.Text = get_local_release_version();
+                        label1.Text = "V" + get_local_release_version();
+                    }
+                    else
+                    {
+                        label1.Text = "V" + current_version;
+                    }
+                    if (current_version != get_local_release_version())
+                    {
+                        label1.ForeColor = Color.Red;
+                    }
+                    else
+                    {
+                        label1.ForeColor = Color.LightGreen;
                     }
                     break;
             }

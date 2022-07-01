@@ -34,6 +34,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.comboVersion = new System.Windows.Forms.ComboBox();
+            this.downloadProgress = new System.Windows.Forms.ProgressBar();
+            this.mainProcess = new System.Windows.Forms.Label();
+            this.subProcess = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -62,15 +65,15 @@
             // 
             // label1
             // 
-            this.label1.AutoSize = true;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.White;
-            this.label1.Location = new System.Drawing.Point(335, 314);
+            this.label1.Location = new System.Drawing.Point(160, 314);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(97, 28);
+            this.label1.Size = new System.Drawing.Size(457, 28);
             this.label1.TabIndex = 2;
-            this.label1.Text = "V0.0.3.2";
+            this.label1.Text = "Loading Version...";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // button1
             // 
@@ -97,12 +100,52 @@
             this.comboVersion.TabIndex = 0;
             this.comboVersion.SelectedIndexChanged += new System.EventHandler(this.comboVersion_SelectedIndexChanged);
             // 
+            // downloadProgress
+            // 
+            this.downloadProgress.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.downloadProgress.Location = new System.Drawing.Point(-6, 465);
+            this.downloadProgress.Name = "downloadProgress";
+            this.downloadProgress.Size = new System.Drawing.Size(808, 38);
+            this.downloadProgress.Step = 1;
+            this.downloadProgress.TabIndex = 4;
+            this.downloadProgress.Visible = false;
+            // 
+            // mainProcess
+            // 
+            this.mainProcess.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.mainProcess.AutoSize = true;
+            this.mainProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.mainProcess.ForeColor = System.Drawing.Color.White;
+            this.mainProcess.Location = new System.Drawing.Point(-2, 397);
+            this.mainProcess.Name = "mainProcess";
+            this.mainProcess.Size = new System.Drawing.Size(199, 25);
+            this.mainProcess.TabIndex = 5;
+            this.mainProcess.Text = "Downloading Game";
+            this.mainProcess.Visible = false;
+            // 
+            // subProcess
+            // 
+            this.subProcess.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.subProcess.AutoSize = true;
+            this.subProcess.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.subProcess.ForeColor = System.Drawing.Color.White;
+            this.subProcess.Location = new System.Drawing.Point(0, 422);
+            this.subProcess.Name = "subProcess";
+            this.subProcess.Size = new System.Drawing.Size(55, 20);
+            this.subProcess.TabIndex = 6;
+            this.subProcess.Text = "0/0MB";
+            this.subProcess.Visible = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(45)))), ((int)(((byte)(45)))));
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 500);
+            this.Controls.Add(this.subProcess);
+            this.Controls.Add(this.mainProcess);
+            this.Controls.Add(this.downloadProgress);
             this.Controls.Add(this.comboVersion);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.label1);
@@ -126,6 +169,9 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.ComboBox comboVersion;
+        private System.Windows.Forms.ProgressBar downloadProgress;
+        private System.Windows.Forms.Label mainProcess;
+        private System.Windows.Forms.Label subProcess;
     }
 }
 
