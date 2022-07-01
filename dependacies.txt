@@ -1,1 +1,2 @@
-
+https://github.com/generic-glitch/BF-FileHost/raw/main/discord-game-sdk-godot.dll
+https://github.com/generic-glitch/BF-FileHost/raw/main/discord_game_sdk.dll
