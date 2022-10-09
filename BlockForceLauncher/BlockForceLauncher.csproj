@@ -7,7 +7,7 @@
     <ProjectGuid>{470F6952-C489-4D1B-BEBF-AEAA69B1DA3E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>BlockForceLauncher</RootNamespace>
-    <AssemblyName>BlockForceLauncher</AssemblyName>
+    <AssemblyName>Block Source Launcher</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -68,6 +68,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
