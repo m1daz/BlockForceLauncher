@@ -15,7 +15,7 @@ using System.Net.Mime;
 
 namespace BlockForceLauncher
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
         WebClient wc = new WebClient();
         string current_version;
@@ -23,7 +23,7 @@ namespace BlockForceLauncher
         string[] dependencies;
         string file_beta;
         string file_release;
-        public Form1()
+        public MainForm()
         {
             InitializeComponent();
         }
@@ -249,6 +249,7 @@ namespace BlockForceLauncher
                 Process.Start(@".\files\BlockForceRelease.exe");
                 label1.Text = "V" + current_version;
                 write_release_version();
+                POST_launch();
                 button1.Enabled = true;
             }
         }
@@ -295,8 +296,52 @@ namespace BlockForceLauncher
                 Process.Start(@".\files\BlockForceBeta.exe");
                 label1.Text = "V" + current_beta;
                 write_beta_version();
+                POST_launch();
                 button1.Enabled = true;
             }
+        }
+
+        private void POST_launch()
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke((MethodInvoker)delegate () {
+                    this.Visible = false;
+                    this.Hide();
+                    this.ShowInTaskbar = false;
+                });
+            }
+            else
+            {
+                this.Visible = false;
+                this.Hide();
+                this.ShowInTaskbar = false;
+            }
+            Thread.Sleep(3000);
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (Process.GetProcessesByName("BlockForceBeta").Length > 0 || Process.GetProcessesByName("BlockForceRelease").Length > 0 || Process.GetProcessesByName("BFR (DEBUG)").Length > 0 || Process.GetProcessesByName("BFR").Length > 0)
+                    {
+                        Console.WriteLine("BFR Running");
+                    }
+                    else
+                    {
+                        Console.WriteLine("BFR not running");
+                        if (this.InvokeRequired)
+                        {
+                            this.BeginInvoke((MethodInvoker)delegate () { this.Show(); this.Visible = true; this.ShowInTaskbar = true; });
+                        }
+                        else
+                        {
+                            this.Show(); this.Visible = true; this.ShowInTaskbar = true;
+                        }
+                        break;
+                    }
+                    Thread.Sleep(500);
+                }
+            }).Start();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -346,11 +391,13 @@ namespace BlockForceLauncher
                 {
                     Process.Start(@".\files\BlockForceBeta.exe");
                     write_beta_version();
+                    POST_launch();
                 }
                 else
                 {
                     Process.Start(@".\files\BlockForceRelease.exe");
                     write_release_version();
+                    POST_launch();
                 }
                 if (this.label1.InvokeRequired)
                 {
@@ -471,6 +518,28 @@ namespace BlockForceLauncher
                         label1.ForeColor = Color.LightGreen;
                     }
                     break;
+            }
+        }
+
+        public void KillProcessesByName(string name)
+        {
+            Process[] workers = Process.GetProcessesByName(name);
+            foreach (Process worker in workers)
+            {
+                worker.Kill();
+                worker.WaitForExit();
+                worker.Dispose();
+            }
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Process.GetProcessesByName("BlockForceBeta").Length > 0 || Process.GetProcessesByName("BlockForceRelease").Length > 0 || Process.GetProcessesByName("BFR (DEBUG)").Length > 0 || Process.GetProcessesByName("BFR").Length > 0)
+            {
+                KillProcessesByName("BlockForceBeta");
+                KillProcessesByName("BlockForceRelease");
+                KillProcessesByName("BFR (DEBUG)");
+                KillProcessesByName("BFR");
             }
         }
     }
