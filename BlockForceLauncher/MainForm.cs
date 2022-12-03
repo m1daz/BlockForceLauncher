@@ -219,7 +219,7 @@ namespace BlockForceLauncher
                 {
                     File.Delete(@"files/BlockForceRelease.exe");
                 }
-                button1.Enabled = false;
+                launchButton.Enabled = false;
                 label1.Text = "Updating...";
                 mainProcess.Text = "Downloading Game";
                 subProcess.Text = "Loading...";
@@ -244,13 +244,13 @@ namespace BlockForceLauncher
             }
             else
             {
-                button1.Enabled = false;
+                launchButton.Enabled = false;
                 label1.Text = "Launching...";
                 Process.Start(@".\files\BlockForceRelease.exe");
                 label1.Text = "V" + current_version;
                 write_release_version();
                 POST_launch();
-                button1.Enabled = true;
+                launchButton.Enabled = true;
             }
         }
 
@@ -267,7 +267,7 @@ namespace BlockForceLauncher
                 {
                     File.Delete(@"files/BlockForceBeta.exe");
                 }
-                button1.Enabled = false;
+                launchButton.Enabled = false;
                 label1.Text = "Updating...";
                 mainProcess.Text = "Downloading Game";
                 subProcess.Text = "Loading...";
@@ -291,13 +291,13 @@ namespace BlockForceLauncher
             }
             else
             {
-                button1.Enabled = false;
+                launchButton.Enabled = false;
                 label1.Text = "Launching...";
                 Process.Start(@".\files\BlockForceBeta.exe");
                 label1.Text = "V" + current_beta;
                 write_beta_version();
                 POST_launch();
-                button1.Enabled = true;
+                launchButton.Enabled = true;
             }
         }
 
@@ -346,19 +346,7 @@ namespace BlockForceLauncher
 
         private void button1_Click(object sender, EventArgs e)
         {
-            label1.ForeColor = Color.White;
-            switch (this.comboVersion.SelectedIndex)
-            {
-                case 0:
-                    launch_release();
-                    break;
-                case 1:
-                    launch_beta();
-                    break;
-                default:
-                    launch_release();
-                    break;
-            }
+
         }
 
         public void download_external_dependencies(int ver, bool skip = false)
@@ -407,13 +395,13 @@ namespace BlockForceLauncher
                 {
                     this.label1.Text = "V" + current_version;
                 }
-                if (this.button1.InvokeRequired)
+                if (this.launchButton.InvokeRequired)
                 {
-                    this.button1.BeginInvoke((MethodInvoker)delegate () { this.button1.Enabled = true; });
+                    this.launchButton.BeginInvoke((MethodInvoker)delegate () { this.launchButton.Enabled = true; });
                 }
                 else
                 {
-                    this.button1.Enabled = true;
+                    this.launchButton.Enabled = true;
                 }
                 label1.ForeColor = Color.LightGreen;
             }
@@ -541,6 +529,28 @@ namespace BlockForceLauncher
                 KillProcessesByName("BFR (DEBUG)");
                 KillProcessesByName("BFR");
             }
+        }
+
+        private void launchButton_Click(object sender, EventArgs e)
+        {
+            label1.ForeColor = Color.White;
+            switch (this.comboVersion.SelectedIndex)
+            {
+                case 0:
+                    launch_release();
+                    break;
+                case 1:
+                    launch_beta();
+                    break;
+                default:
+                    launch_release();
+                    break;
+            }
+        }
+
+        private void exitButton_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
         }
     }
 }
